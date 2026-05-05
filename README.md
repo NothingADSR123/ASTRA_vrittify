@@ -1,5 +1,6 @@
 # ASTRA MVP — Authorship Verification System
 ![alt text](image.png)
+![alt text](image-1.png)
 ## Overview
 
 ASTRA is a prototype system designed to verify the authenticity of student assignments by analyzing both textual and visual characteristics. Unlike traditional plagiarism detection tools, ASTRA focuses on **authorship verification** — determining whether a given submission was genuinely produced by the claimed student.
