@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+python-multipart
+pytesseract
+opencv-python-headless
+numpy
+faiss-cpu
+sentence-transformers
+pdf2image
+Pillow
+langchain
+langchain-community
