@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASTRA | Advanced Heuristic Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
+        .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+        .loader { border-top-color: #3b82f6; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen pb-20">
+
+    <!-- Top Navigation Bar -->
+    <nav class="gradient-bg text-white py-4 px-8 mb-8 shadow-xl">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i data-lucide="shield-check" class="text-blue-400"></i>
+                <span class="text-xl font-bold tracking-tight">ASTRA <span class="text-blue-400">PRO</span></span>
+            </div>
+            <div class="text-sm font-medium text-slate-400">v2.4 Heuristic + RAG Engine</div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left Column: Upload & Input -->
+            <div class="lg:col-span-4 space-y-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                        <i data-lucide="upload-cloud" class="w-5 h-5 mr-2 text-blue-600"></i>
+                        Submission Portal
+                    </h2>
+                    <form id="uploadForm" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Student Identification</label>
+                            <input type="text" name="student_id" required placeholder="e.g. STU-9920" 
+                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+                        </div>
+                        
+                        <div class="relative border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-blue-400 transition-colors bg-slate-50/50">
+                            <input type="file" name="file" accept=".png,.jpg,.jpeg,.pdf" required 
+                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <i data-lucide="file-text" class="w-10 h-10 mx-auto text-slate-400 mb-2"></i>
+                            <p class="text-sm text-slate-600">Click to upload or drag & drop</p>
+                            <p class="text-xs text-slate-400 mt-1">PDF, PNG, JPG (Max 10MB)</p>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-200 transition-all flex items-center justify-center space-x-2">
+                            <span>Initialize Analysis</span>
+                            <i data-lucide="zap" class="w-4 h-4"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- System Status -->
+                <div class="bg-slate-800 rounded-2xl p-6 text-white">
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Engine Status</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-300">OCR Engine</span>
+                            <span class="text-green-400 flex items-center"><span class="w-2 h-2 bg-green-400 rounded-full mr-2"></span> Online</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-300">RAG Vector DB</span>
+                            <span class="text-green-400 flex items-center"><span class="w-2 h-2 bg-green-400 rounded-full mr-2"></span> Connected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Results -->
+            <div class="lg:col-span-8">
+                <!-- Loading State -->
+                <div id="loading" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-20 text-center">
+                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-100 h-16 w-16 mx-auto mb-6"></div>
+                    <h3 class="text-xl font-bold text-slate-800">Processing Document</h3>
+                    <p class="text-slate-500">Executing Stylometry, Handwriting Cross-Ref, and RAG Explainability...</p>
+                </div>
+
+                <!-- Results Display -->
+                <div id="results" class="hidden space-y-6">
+                    <!-- Main Scores Card -->
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                            <div>
+                                <h2 class="text-2xl font-bold text-slate-800">Intelligence Report</h2>
+                                <p class="text-sm text-slate-500">Analysis ID: <span id="reportId" class="font-mono text-blue-600 font-bold">#---</span></p>
+                            </div>
+                            <span id="riskBadge" class="px-6 py-2 rounded-full text-xs font-black tracking-widest">---</span>
+                        </div>
+
+                        <div class="p-8">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-end">
+                                        <p class="text-xs font-black text-slate-400 uppercase">AI Likelihood</p>
+                                        <p id="aiScore" class="text-xl font-bold text-blue-600"></p>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                        <div id="aiBar" class="bg-blue-500 h-full transition-all duration-1000" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-end">
+                                        <p class="text-xs font-black text-slate-400 uppercase">Handwriting Match</p>
+                                        <p id="hwScore" class="text-xl font-bold text-purple-600"></p>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                        <div id="hwBar" class="bg-purple-500 h-full transition-all duration-1000" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-end">
+                                        <p class="text-xs font-black text-slate-400 uppercase">Integrity Score</p>
+                                        <p id="suspicionScore" class="text-xl font-bold text-orange-600"></p>
+                                    </div>
+                                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                        <div id="suspicionBar" class="bg-orange-500 h-full transition-all duration-1000" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+                                <!-- Explanation Text -->
+                                <div class="md:col-span-8">
+                                    <h3 class="flex items-center text-sm font-bold text-slate-800 mb-4 italic">
+                                        <i data-lucide="brain-circuit" class="w-4 h-4 mr-2 text-blue-500"></i>
+                                        RAG Generative Insight
+                                    </h3>
+                                    <div id="explanation" class="bg-slate-50 p-6 rounded-2xl text-slate-700 leading-relaxed text-sm border border-slate-100 min-h-[200px]"></div>
+                                </div>
+                                
+                                <!-- Flags / Warnings -->
+                                <div class="md:col-span-4">
+                                    <h3 class="text-sm font-bold text-slate-800 mb-4 italic">Heuristic Flags</h3>
+                                    <div id="flagsContainer" class="hidden">
+                                        <ul id="flagsList" class="space-y-3"></ul>
+                                    </div>
+                                    <div id="noFlags" class="text-xs text-green-600 font-medium bg-green-50 p-4 rounded-xl border border-green-100 flex items-center">
+                                        <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
+                                        No violations detected.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Data -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-white p-4 rounded-xl border border-slate-200">
+                            <p class="text-[10px] font-black text-slate-400 uppercase">Tokens Processed</p>
+                            <p class="text-lg font-bold text-slate-800">1,240</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200">
+                            <p class="text-[10px] font-black text-slate-400 uppercase">Model Used</p>
+                            <p class="text-lg font-bold text-slate-800">GPT-4o / RAG</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200">
+                            <p class="text-[10px] font-black text-slate-400 uppercase">Processing Time</p>
+                            <p class="text-lg font-bold text-slate-800">1.8s</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl border border-slate-200">
+                            <p class="text-[10px] font-black text-slate-400 uppercase">OCR Confidence</p>
+                            <p class="text-lg font-bold text-slate-800">99.2%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        document.getElementById('uploadForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('reportId').textContent = '#' + Math.floor(Math.random()*9000 + 1000);
+
+            try {
+                // Simulating API call - Replace with your real fetch
+                const response = await fetch('/upload', { method: 'POST', body: formData });
+                const data = await response.json();
+
+                // Set Text Data
+                document.getElementById('aiScore').textContent = (data.ai_likelihood * 100).toFixed(0) + '%';
+                document.getElementById('hwScore').textContent = (data.handwriting_similarity * 100).toFixed(0) + '%';
+                document.getElementById('suspicionScore').textContent = (data.suspicion_score * 100).toFixed(0) + '%';
+                document.getElementById('explanation').textContent = data.explanation;
+
+                // Animate Progress Bars
+                setTimeout(() => {
+                    document.getElementById('aiBar').style.width = (data.ai_likelihood * 100) + '%';
+                    document.getElementById('hwBar').style.width = (data.handwriting_similarity * 100) + '%';
+                    document.getElementById('suspicionBar').style.width = (data.suspicion_score * 100) + '%';
+                }, 100);
+
+                // Handle Risk Badge
+                const badge = document.getElementById('riskBadge');
+                badge.textContent = data.risk_level + ' RISK';
+                const badgeStyles = {
+                    'HIGH': 'bg-red-100 text-red-700 border border-red-200',
+                    'MEDIUM': 'bg-amber-100 text-amber-700 border border-amber-200',
+                    'LOW': 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                };
+                badge.className = `px-6 py-2 rounded-full text-xs font-black tracking-widest ${badgeStyles[data.risk_level] || badgeStyles['LOW']}`;
+
+                // Handle Flags
+                const flagsList = document.getElementById('flagsList');
+                flagsList.innerHTML = '';
+                if (data.flags && data.flags.length > 0) {
+                    document.getElementById('flagsContainer').classList.remove('hidden');
+                    document.getElementById('noFlags').classList.add('hidden');
+                    data.flags.forEach(flag => {
+                        const li = document.createElement('li');
+                        li.className = 'flex items-start text-xs font-semibold text-red-600 bg-red-50 p-3 rounded-lg border border-red-100';
+                        li.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 mr-2 flex-shrink-0"></i><span>${flag}</span>`;
+                        flagsList.appendChild(li);
+                    });
+                    lucide.createIcons();
+                } else {
+                    document.getElementById('flagsContainer').classList.add('hidden');
+                    document.getElementById('noFlags').classList.remove('hidden');
+                }
+
+                document.getElementById('results').classList.remove('hidden');
+            } catch (error) {
+                console.error(error);
+                alert('Analysis Error: Please check console or backend connection.');
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        };
+    </script>
+</body>
+</html>

@@ -3,173 +3,595 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASTRA | Advanced Heuristic Analysis</title>
+    <title>ASTRA PRO | Enterprise AI Authorship Verification</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
-        .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
-        .loader { border-top-color: #3b82f6; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        
+        /* Dark theme gradient */
+        .bg-gradient-dark {
+            background: linear-gradient(135deg, #020617 0%, #0f172a 50%, #1e293b 100%);
+        }
+        
+        /* Glassmorphism */
+        .glass {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        
+        .glass-light {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); }
+        }
+        
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen pb-20">
+<body class="bg-gradient-dark min-h-screen text-slate-100">
 
-    <!-- Top Navigation Bar -->
-    <nav class="gradient-bg text-white py-4 px-8 mb-8 shadow-xl">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <i data-lucide="shield-check" class="text-blue-400"></i>
-                <span class="text-xl font-bold tracking-tight">ASTRA <span class="text-blue-400">PRO</span></span>
-            </div>
-            <div class="text-sm font-medium text-slate-400">v2.4 Heuristic + RAG Engine</div>
-        </div>
-    </nav>
-
-    <div class="container mx-auto px-4">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            <!-- Left Column: Upload & Input -->
-            <div class="lg:col-span-4 space-y-6">
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
-                        <i data-lucide="upload-cloud" class="w-5 h-5 mr-2 text-blue-600"></i>
-                        Submission Portal
-                    </h2>
-                    <form id="uploadForm" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Student Identification</label>
-                            <input type="text" name="student_id" required placeholder="e.g. STU-9920" 
-                                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+    <!-- Landing Page -->
+    <div id="landingPage" class="min-h-screen">
+        <!-- Navbar -->
+        <nav class="glass sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-6 py-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                            <i data-lucide="shield-check" class="w-6 h-6"></i>
                         </div>
-                        
-                        <div class="relative border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-blue-400 transition-colors bg-slate-50/50">
-                            <input type="file" name="file" accept=".png,.jpg,.jpeg,.pdf" required 
-                                class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                            <i data-lucide="file-text" class="w-10 h-10 mx-auto text-slate-400 mb-2"></i>
-                            <p class="text-sm text-slate-600">Click to upload or drag & drop</p>
-                            <p class="text-xs text-slate-400 mt-1">PDF, PNG, JPG (Max 10MB)</p>
-                        </div>
-
-                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold shadow-lg shadow-blue-200 transition-all flex items-center justify-center space-x-2">
-                            <span>Initialize Analysis</span>
-                            <i data-lucide="zap" class="w-4 h-4"></i>
+                        <span class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">ASTRA PRO</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="showLogin()" class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">
+                            Institutional Login
                         </button>
-                    </form>
+                        <button onclick="showAnalysis()" class="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl font-semibold transition-all shadow-lg shadow-blue-500/25">
+                            Launch Analysis
+                        </button>
+                    </div>
                 </div>
+            </div>
+        </nav>
 
-                <!-- System Status -->
-                <div class="bg-slate-800 rounded-2xl p-6 text-white">
-                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Engine Status</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-300">OCR Engine</span>
-                            <span class="text-green-400 flex items-center"><span class="w-2 h-2 bg-green-400 rounded-full mr-2"></span> Online</span>
+        <!-- Hero Section -->
+        <div class="max-w-7xl mx-auto px-6 py-20">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="space-y-8">
+                    <div class="inline-flex items-center px-4 py-2 rounded-full glass-light border border-blue-500/30">
+                        <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                        <span class="text-sm text-blue-300 font-medium">Enterprise AI Platform v3.0</span>
+                    </div>
+                    <h1 class="text-5xl lg:text-6xl font-extrabold leading-tight">
+                        Verify Authorship with
+                        <span class="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                            AI-Powered Intelligence
+                        </span>
+                    </h1>
+                    <p class="text-xl text-slate-400 leading-relaxed">
+                        Advanced forensic analysis combining OCR, stylometry, and handwriting verification 
+                        to ensure academic integrity with transparent, explainable results.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <button onclick="showAnalysis()" class="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-2xl font-bold text-lg transition-all shadow-xl shadow-blue-500/30 animate-pulse-glow">
+                            Start Analysis Now
+                        </button>
+                        <button onclick="scrollToFeatures()" class="px-8 py-4 glass-light rounded-2xl font-bold text-lg hover:bg-white/10 transition-all">
+                            View Features
+                        </button>
+                    </div>
+                    <div class="flex items-center space-x-8 pt-4">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-white">99.2%</div>
+                            <div class="text-sm text-slate-500">Accuracy Rate</div>
                         </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-300">RAG Vector DB</span>
-                            <span class="text-green-400 flex items-center"><span class="w-2 h-2 bg-green-400 rounded-full mr-2"></span> Connected</span>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-white">2.1s</div>
+                            <div class="text-sm text-slate-500">Avg Processing</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-white">50K+</div>
+                            <div class="text-sm text-slate-500">Analyses Done</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="absolute -inset-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl blur-2xl opacity-30 animate-float"></div>
+                    <div class="relative glass rounded-3xl p-8 space-y-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                                    <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold">Analysis Complete</div>
+                                    <div class="text-sm text-slate-400">ID: #AST-8472</div>
+                                </div>
+                            </div>
+                            <span class="px-4 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-bold">LOW RISK</span>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-slate-400">AI Likelihood</span>
+                                    <span class="text-green-400 font-bold">12%</span>
+                                </div>
+                                <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
+                                    <div class="h-full w-3/25 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span class="text-slate-400">Handwriting Match</span>
+                                    <span class="text-blue-400 font-bold">94%</span>
+                                </div>
+                                <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
+                                    <div class="h-full w-[94%] bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Right Column: Results -->
-            <div class="lg:col-span-8">
-                <!-- Loading State -->
-                <div id="loading" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-20 text-center">
-                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-slate-100 h-16 w-16 mx-auto mb-6"></div>
-                    <h3 class="text-xl font-bold text-slate-800">Processing Document</h3>
-                    <p class="text-slate-500">Executing Stylometry, Handwriting Cross-Ref, and RAG Explainability...</p>
+        <!-- Features Section -->
+        <div id="featuresSection" class="max-w-7xl mx-auto px-6 py-20">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Enterprise-Grade Features</h2>
+                <p class="text-xl text-slate-400 max-w-2xl mx-auto">
+                    A comprehensive suite of forensic analysis tools designed for academic institutions
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="glass-light rounded-2xl p-8 hover:bg-white/5 transition-all group">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i data-lucide="scan" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">OCR Intelligence</h3>
+                    <p class="text-slate-400">Advanced text extraction from images and PDFs with high accuracy and noise reduction.</p>
                 </div>
+                <div class="glass-light rounded-2xl p-8 hover:bg-white/5 transition-all group">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i data-lucide="file-text" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Stylometric Analysis</h3>
+                    <p class="text-slate-400">Detect AI-generated content by analyzing writing patterns, burstiness, and repetition.</p>
+                </div>
+                <div class="glass-light rounded-2xl p-8 hover:bg-white/5 transition-all group">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i data-lucide="pen-tool" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Handwriting Verification</h3>
+                    <p class="text-slate-400">Compare submitted documents against reference samples to ensure identity consistency.</p>
+                </div>
+                <div class="glass-light rounded-2xl p-8 hover:bg-white/5 transition-all group">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i data-lucide="brain-circuit" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Explainable AI</h3>
+                    <p class="text-slate-400">RAG-powered insights with clear, human-readable explanations for every decision.</p>
+                </div>
+                <div class="glass-light rounded-2xl p-8 hover:bg-white/5 transition-all group">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i data-lucide="activity" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Risk Scoring</h3>
+                    <p class="text-slate-400">Composite scoring system combining multiple signals into a single integrity score.</p>
+                </div>
+                <div class="glass-light rounded-2xl p-8 hover:bg-white/5 transition-all group">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-500 to-zinc-500 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i data-lucide="bar-chart-3" class="w-7 h-7"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Analytics Dashboard</h3>
+                    <p class="text-slate-400">Comprehensive analytics with trends, distributions, and institutional insights.</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                <!-- Results Display -->
-                <div id="results" class="hidden space-y-6">
-                    <!-- Main Scores Card -->
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                            <div>
-                                <h2 class="text-2xl font-bold text-slate-800">Intelligence Report</h2>
-                                <p class="text-sm text-slate-500">Analysis ID: <span id="reportId" class="font-mono text-blue-600 font-bold">#---</span></p>
-                            </div>
-                            <span id="riskBadge" class="px-6 py-2 rounded-full text-xs font-black tracking-widest">---</span>
+    <!-- Login Page -->
+    <div id="loginPage" class="hidden min-h-screen flex items-center justify-center p-6">
+        <div class="w-full max-w-md">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 mb-4">
+                    <i data-lucide="shield-check" class="w-8 h-8"></i>
+                </div>
+                <h1 class="text-3xl font-bold mb-2">Institutional Login</h1>
+                <p class="text-slate-400">Access ASTRA PRO for your organization</p>
+            </div>
+            <div class="glass rounded-3xl p-8">
+                <form onsubmit="showDashboard(event)" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Institution ID</label>
+                        <input type="text" placeholder="UNIV-001" class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+                        <input type="email" placeholder="admin@university.edu" class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Password</label>
+                        <input type="password" placeholder="••••••••" class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                    </div>
+                    <button type="submit" class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl font-bold text-lg transition-all shadow-lg shadow-blue-500/25">
+                        Sign In
+                    </button>
+                </form>
+                <div class="mt-6 text-center">
+                    <button onclick="showLanding()" class="text-blue-400 hover:text-blue-300 text-sm font-medium">← Back to Home</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboardPage" class="hidden min-h-screen">
+        <div class="flex">
+            <!-- Sidebar -->
+            <div class="w-64 min-h-screen glass border-r border-slate-700/50 p-6">
+                <div class="flex items-center space-x-3 mb-10">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    </div>
+                    <span class="text-xl font-bold">ASTRA PRO</span>
+                </div>
+                <nav class="space-y-2">
+                    <button onclick="showDashboardSection('overview')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-blue-500/20 text-blue-400 font-medium">
+                        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                        <span>Dashboard</span>
+                    </button>
+                    <button onclick="showAnalysis()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-300 font-medium transition-colors">
+                        <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+                        <span>Analyze Submission</span>
+                    </button>
+                    <button onclick="showDashboardSection('analytics')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-300 font-medium transition-colors">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                        <span>Analytics</span>
+                    </button>
+                    <button onclick="showDashboardSection('history')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-300 font-medium transition-colors">
+                        <i data-lucide="history" class="w-5 h-5"></i>
+                        <span>History</span>
+                    </button>
+                    <button onclick="showDashboardSection('logs')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-300 font-medium transition-colors">
+                        <i data-lucide="terminal" class="w-5 h-5"></i>
+                        <span>System Logs</span>
+                    </button>
+                    <button onclick="showDashboardSection('settings')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-300 font-medium transition-colors">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                        <span>Settings</span>
+                    </button>
+                </nav>
+                <div class="absolute bottom-6 left-6 right-6">
+                    <button onclick="showLanding()" class="w-full flex items-center justify-center space-x-2 px-4 py-3 rounded-xl border border-slate-700 text-slate-400 hover:text-white hover:border-slate-600 transition-colors">
+                        <i data-lucide="log-out" class="w-5 h-5"></i>
+                        <span>Logout</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 p-8">
+                <!-- Overview Section -->
+                <div id="overviewSection">
+                    <div class="flex justify-between items-center mb-8">
+                        <div>
+                            <h1 class="text-3xl font-bold">Dashboard Overview</h1>
+                            <p class="text-slate-400 mt-1">Welcome back, Administrator</p>
                         </div>
-
-                        <div class="p-8">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-                                <div class="space-y-2">
-                                    <div class="flex justify-between items-end">
-                                        <p class="text-xs font-black text-slate-400 uppercase">AI Likelihood</p>
-                                        <p id="aiScore" class="text-xl font-bold text-blue-600"></p>
-                                    </div>
-                                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                                        <div id="aiBar" class="bg-blue-500 h-full transition-all duration-1000" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex justify-between items-end">
-                                        <p class="text-xs font-black text-slate-400 uppercase">Handwriting Match</p>
-                                        <p id="hwScore" class="text-xl font-bold text-purple-600"></p>
-                                    </div>
-                                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                                        <div id="hwBar" class="bg-purple-500 h-full transition-all duration-1000" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex justify-between items-end">
-                                        <p class="text-xs font-black text-slate-400 uppercase">Integrity Score</p>
-                                        <p id="suspicionScore" class="text-xl font-bold text-orange-600"></p>
-                                    </div>
-                                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                                        <div id="suspicionBar" class="bg-orange-500 h-full transition-all duration-1000" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
-                                <!-- Explanation Text -->
-                                <div class="md:col-span-8">
-                                    <h3 class="flex items-center text-sm font-bold text-slate-800 mb-4 italic">
-                                        <i data-lucide="brain-circuit" class="w-4 h-4 mr-2 text-blue-500"></i>
-                                        RAG Generative Insight
-                                    </h3>
-                                    <div id="explanation" class="bg-slate-50 p-6 rounded-2xl text-slate-700 leading-relaxed text-sm border border-slate-100 min-h-[200px]"></div>
-                                </div>
-                                
-                                <!-- Flags / Warnings -->
-                                <div class="md:col-span-4">
-                                    <h3 class="text-sm font-bold text-slate-800 mb-4 italic">Heuristic Flags</h3>
-                                    <div id="flagsContainer" class="hidden">
-                                        <ul id="flagsList" class="space-y-3"></ul>
-                                    </div>
-                                    <div id="noFlags" class="text-xs text-green-600 font-medium bg-green-50 p-4 rounded-xl border border-green-100 flex items-center">
-                                        <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
-                                        No violations detected.
-                                    </div>
-                                </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center space-x-2 px-4 py-2 glass-light rounded-xl">
+                                <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                                <span class="text-sm text-green-400">All Systems Online</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Footer Data -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="bg-white p-4 rounded-xl border border-slate-200">
-                            <p class="text-[10px] font-black text-slate-400 uppercase">Tokens Processed</p>
-                            <p class="text-lg font-bold text-slate-800">1,240</p>
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="glass-light rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                                    <i data-lucide="file-search" class="w-6 h-6 text-blue-400"></i>
+                                </div>
+                                <span class="text-green-400 text-sm font-medium">+12%</span>
+                            </div>
+                            <div class="text-3xl font-bold mb-1">1,247</div>
+                            <div class="text-slate-400 text-sm">Total Analyses</div>
                         </div>
-                        <div class="bg-white p-4 rounded-xl border border-slate-200">
-                            <p class="text-[10px] font-black text-slate-400 uppercase">Model Used</p>
-                            <p class="text-lg font-bold text-slate-800">GPT-4o / RAG</p>
+                        <div class="glass-light rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center">
+                                    <i data-lucide="alert-triangle" class="w-6 h-6 text-red-400"></i>
+                                </div>
+                                <span class="text-red-400 text-sm font-medium">+5%</span>
+                            </div>
+                            <div class="text-3xl font-bold mb-1">89</div>
+                            <div class="text-slate-400 text-sm">High Risk Cases</div>
                         </div>
-                        <div class="bg-white p-4 rounded-xl border border-slate-200">
-                            <p class="text-[10px] font-black text-slate-400 uppercase">Processing Time</p>
-                            <p class="text-lg font-bold text-slate-800">1.8s</p>
+                        <div class="glass-light rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                                    <i data-lucide="shield-check" class="w-6 h-6 text-emerald-400"></i>
+                                </div>
+                                <span class="text-emerald-400 text-sm font-medium">+2%</span>
+                            </div>
+                            <div class="text-3xl font-bold mb-1">78.4%</div>
+                            <div class="text-slate-400 text-sm">Avg Integrity Score</div>
                         </div>
-                        <div class="bg-white p-4 rounded-xl border border-slate-200">
-                            <p class="text-[10px] font-black text-slate-400 uppercase">OCR Confidence</p>
-                            <p class="text-lg font-bold text-slate-800">99.2%</p>
+                        <div class="glass-light rounded-2xl p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                                    <i data-lucide="clock" class="w-6 h-6 text-purple-400"></i>
+                                </div>
+                                <span class="text-emerald-400 text-sm font-medium">-8%</span>
+                            </div>
+                            <div class="text-3xl font-bold mb-1">1.9s</div>
+                            <div class="text-slate-400 text-sm">Avg Processing Time</div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="glass-light rounded-2xl p-6">
+                            <h3 class="text-lg font-bold mb-4">Quick Actions</h3>
+                            <div class="space-y-3">
+                                <button onclick="showAnalysis()" class="w-full flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-blue-600/20 to-indigo-600/20 border border-blue-500/30 rounded-xl hover:from-blue-600/30 hover:to-indigo-600/30 transition-all">
+                                    <i data-lucide="upload" class="w-5 h-5 text-blue-400"></i>
+                                    <span class="font-medium">Analyze New Submission</span>
+                                </button>
+                                <button onclick="showDashboardSection('analytics')" class="w-full flex items-center space-x-3 px-4 py-3 glass rounded-xl hover:bg-white/5 transition-all">
+                                    <i data-lucide="bar-chart-3" class="w-5 h-5 text-slate-400"></i>
+                                    <span class="font-medium">View Analytics</span>
+                                </button>
+                                <button onclick="showDashboardSection('history')" class="w-full flex items-center space-x-3 px-4 py-3 glass rounded-xl hover:bg-white/5 transition-all">
+                                    <i data-lucide="history" class="w-5 h-5 text-slate-400"></i>
+                                    <span class="font-medium">Recent History</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="glass-light rounded-2xl p-6">
+                            <h3 class="text-lg font-bold mb-4">Recent Activity</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="check" class="w-5 h-5 text-emerald-400"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="font-medium">Analysis #AST-8472</div>
+                                        <div class="text-sm text-slate-400 truncate">student123 - LOW RISK</div>
+                                    </div>
+                                    <div class="text-xs text-slate-500">2m ago</div>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="alert-triangle" class="w-5 h-5 text-red-400"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="font-medium">Analysis #AST-8471</div>
+                                        <div class="text-sm text-slate-400 truncate">student456 - HIGH RISK</div>
+                                    </div>
+                                    <div class="text-xs text-slate-500">15m ago</div>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="alert-circle" class="w-5 h-5 text-amber-400"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="font-medium">Analysis #AST-8470</div>
+                                        <div class="text-sm text-slate-400 truncate">student789 - MEDIUM RISK</div>
+                                    </div>
+                                    <div class="text-xs text-slate-500">1h ago</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Section -->
+                <div id="analyticsSection" class="hidden">
+                    <div class="mb-8">
+                        <h1 class="text-3xl font-bold">Analytics Dashboard</h1>
+                        <p class="text-slate-400 mt-1">Institutional insights and trends</p>
+                    </div>
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="glass-light rounded-2xl p-6">
+                            <h3 class="text-lg font-bold mb-4">AI Detection Trends</h3>
+                            <div class="h-64 flex items-center justify-center text-slate-500">
+                                <div class="text-center">
+                                    <i data-lucide="line-chart" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
+                                    <p>Chart visualization would appear here</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="glass-light rounded-2xl p-6">
+                            <h3 class="text-lg font-bold mb-4">Risk Distribution</h3>
+                            <div class="h-64 flex items-center justify-center text-slate-500">
+                                <div class="text-center">
+                                    <i data-lucide="pie-chart" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
+                                    <p>Pie chart would appear here</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="glass-light rounded-2xl p-6">
+                            <h3 class="text-lg font-bold mb-4">OCR Accuracy</h3>
+                            <div class="h-64 flex items-center justify-center text-slate-500">
+                                <div class="text-center">
+                                    <i data-lucide="scan" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
+                                    <p>Accuracy metrics would appear here</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="glass-light rounded-2xl p-6">
+                            <h3 class="text-lg font-bold mb-4">Submission Volume</h3>
+                            <div class="h-64 flex items-center justify-center text-slate-500">
+                                <div class="text-center">
+                                    <i data-lucide="bar-chart-2" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
+                                    <p>Volume trends would appear here</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Section -->
+                <div id="historySection" class="hidden">
+                    <div class="mb-8">
+                        <h1 class="text-3xl font-bold">Analysis History</h1>
+                        <p class="text-slate-400 mt-1">Complete record of all submissions</p>
+                    </div>
+                    <div class="glass-light rounded-2xl overflow-hidden">
+                        <table class="w-full">
+                            <thead class="bg-slate-800/50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-sm font-bold text-slate-400 uppercase tracking-wider">ID</th>
+                                    <th class="px-6 py-4 text-left text-sm font-bold text-slate-400 uppercase tracking-wider">Student</th>
+                                    <th class="px-6 py-4 text-left text-sm font-bold text-slate-400 uppercase tracking-wider">Risk Level</th>
+                                    <th class="px-6 py-4 text-left text-sm font-bold text-slate-400 uppercase tracking-wider">AI Score</th>
+                                    <th class="px-6 py-4 text-left text-sm font-bold text-slate-400 uppercase tracking-wider">HW Score</th>
+                                    <th class="px-6 py-4 text-left text-sm font-bold text-slate-400 uppercase tracking-wider">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-700/50">
+                                <tr class="hover:bg-white/5">
+                                    <td class="px-6 py-4 font-mono text-blue-400">#AST-8472</td>
+                                    <td class="px-6 py-4">student123</td>
+                                    <td class="px-6 py-4"><span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-bold">LOW</span></td>
+                                    <td class="px-6 py-4">12%</td>
+                                    <td class="px-6 py-4">94%</td>
+                                    <td class="px-6 py-4 text-slate-400">Today, 2:34 PM</td>
+                                </tr>
+                                <tr class="hover:bg-white/5">
+                                    <td class="px-6 py-4 font-mono text-blue-400">#AST-8471</td>
+                                    <td class="px-6 py-4">student456</td>
+                                    <td class="px-6 py-4"><span class="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm font-bold">HIGH</span></td>
+                                    <td class="px-6 py-4">89%</td>
+                                    <td class="px-6 py-4">45%</td>
+                                    <td class="px-6 py-4 text-slate-400">Today, 2:19 PM</td>
+                                </tr>
+                                <tr class="hover:bg-white/5">
+                                    <td class="px-6 py-4 font-mono text-blue-400">#AST-8470</td>
+                                    <td class="px-6 py-4">student789</td>
+                                    <td class="px-6 py-4"><span class="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-full text-sm font-bold">MEDIUM</span></td>
+                                    <td class="px-6 py-4">56%</td>
+                                    <td class="px-6 py-4">72%</td>
+                                    <td class="px-6 py-4 text-slate-400">Today, 1:45 PM</td>
+                                </tr>
+                                <tr class="hover:bg-white/5">
+                                    <td class="px-6 py-4 font-mono text-blue-400">#AST-8469</td>
+                                    <td class="px-6 py-4">student012</td>
+                                    <td class="px-6 py-4"><span class="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-bold">LOW</span></td>
+                                    <td class="px-6 py-4">23%</td>
+                                    <td class="px-6 py-4">88%</td>
+                                    <td class="px-6 py-4 text-slate-400">Yesterday, 5:12 PM</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Logs Section -->
+                <div id="logsSection" class="hidden">
+                    <div class="mb-8">
+                        <h1 class="text-3xl font-bold">System Logs</h1>
+                        <p class="text-slate-400 mt-1">Real-time system monitoring</p>
+                    </div>
+                    <div class="glass rounded-2xl p-6 font-mono text-sm">
+                        <div class="space-y-2 text-slate-300">
+                            <div><span class="text-green-400">[INFO]</span> System initialized successfully</div>
+                            <div><span class="text-green-400">[INFO]</span> OCR engine loaded - Tesseract v5.5.0</div>
+                            <div><span class="text-green-400">[INFO]</span> RAG vector database connected</div>
+                            <div><span class="text-blue-400">[DEBUG]</span> Processing analysis #AST-8472</div>
+                            <div><span class="text-blue-400">[DEBUG]</span> OCR extraction completed in 0.42s</div>
+                            <div><span class="text-blue-400">[DEBUG]</span> Stylometry analysis completed in 0.18s</div>
+                            <div><span class="text-blue-400">[DEBUG]</span> Handwriting verification completed in 0.31s</div>
+                            <div><span class="text-green-400">[INFO]</span> Analysis #AST-8472 completed in 1.24s</div>
+                            <div><span class="text-amber-400">[WARN]</span> Insufficient text for stylometry in #AST-8471</div>
+                            <div><span class="text-green-400">[INFO]</span> System health check passed</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Section -->
+                <div id="settingsSection" class="hidden">
+                    <div class="mb-8">
+                        <h1 class="text-3xl font-bold">Settings</h1>
+                        <p class="text-slate-400 mt-1">Configure your ASTRA PRO instance</p>
+                    </div>
+                    <div class="glass-light rounded-2xl p-6 max-w-2xl">
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-lg font-bold mb-4">Analysis Settings</h3>
+                                <div class="space-y-4">
+                                    <label class="flex items-center justify-between">
+                                        <span>Enable OCR Preprocessing</span>
+                                        <div class="w-12 h-6 bg-blue-600 rounded-full relative">
+                                            <div class="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5"></div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center justify-between">
+                                        <span>Auto-Save Reports</span>
+                                        <div class="w-12 h-6 bg-blue-600 rounded-full relative">
+                                            <div class="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5"></div>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center justify-between">
+                                        <span>Email Notifications</span>
+                                        <div class="w-12 h-6 bg-slate-700 rounded-full relative">
+                                            <div class="w-5 h-5 bg-white rounded-full absolute left-0.5 top-0.5"></div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="pt-6 border-t border-slate-700">
+                                <h3 class="text-lg font-bold mb-4">Scoring Weights</h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="flex justify-between text-sm mb-2">
+                                            <span>AI Likelihood Weight</span>
+                                            <span class="text-blue-400">60%</span>
+                                        </div>
+                                        <div class="h-2 bg-slate-700 rounded-full">
+                                            <div class="w-3/5 h-full bg-blue-500 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-sm mb-2">
+                                            <span>Handwriting Weight</span>
+                                            <span class="text-purple-400">30%</span>
+                                        </div>
+                                        <div class="h-2 bg-slate-700 rounded-full">
+                                            <div class="w-[30%] h-full bg-purple-500 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -181,68 +603,45 @@
         // Initialize Lucide Icons
         lucide.createIcons();
 
-        document.getElementById('uploadForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            
-            document.getElementById('loading').classList.remove('hidden');
-            document.getElementById('results').classList.add('hidden');
-            document.getElementById('reportId').textContent = '#' + Math.floor(Math.random()*9000 + 1000);
+        // Page navigation functions
+        function showLanding() {
+            hideAllPages();
+            document.getElementById('landingPage').classList.remove('hidden');
+        }
 
-            try {
-                // Simulating API call - Replace with your real fetch
-                const response = await fetch('/upload', { method: 'POST', body: formData });
-                const data = await response.json();
+        function showLogin() {
+            hideAllPages();
+            document.getElementById('loginPage').classList.remove('hidden');
+        }
 
-                // Set Text Data
-                document.getElementById('aiScore').textContent = (data.ai_likelihood * 100).toFixed(0) + '%';
-                document.getElementById('hwScore').textContent = (data.handwriting_similarity * 100).toFixed(0) + '%';
-                document.getElementById('suspicionScore').textContent = (data.suspicion_score * 100).toFixed(0) + '%';
-                document.getElementById('explanation').textContent = data.explanation;
+        function showDashboard(e) {
+            if (e) e.preventDefault();
+            hideAllPages();
+            document.getElementById('dashboardPage').classList.remove('hidden');
+            showDashboardSection('overview');
+        }
 
-                // Animate Progress Bars
-                setTimeout(() => {
-                    document.getElementById('aiBar').style.width = (data.ai_likelihood * 100) + '%';
-                    document.getElementById('hwBar').style.width = (data.handwriting_similarity * 100) + '%';
-                    document.getElementById('suspicionBar').style.width = (data.suspicion_score * 100) + '%';
-                }, 100);
+        function showAnalysis() {
+            window.location.href = '/analysis.html';
+        }
 
-                // Handle Risk Badge
-                const badge = document.getElementById('riskBadge');
-                badge.textContent = data.risk_level + ' RISK';
-                const badgeStyles = {
-                    'HIGH': 'bg-red-100 text-red-700 border border-red-200',
-                    'MEDIUM': 'bg-amber-100 text-amber-700 border border-amber-200',
-                    'LOW': 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                };
-                badge.className = `px-6 py-2 rounded-full text-xs font-black tracking-widest ${badgeStyles[data.risk_level] || badgeStyles['LOW']}`;
+        function hideAllPages() {
+            document.getElementById('landingPage').classList.add('hidden');
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.add('hidden');
+        }
 
-                // Handle Flags
-                const flagsList = document.getElementById('flagsList');
-                flagsList.innerHTML = '';
-                if (data.flags && data.flags.length > 0) {
-                    document.getElementById('flagsContainer').classList.remove('hidden');
-                    document.getElementById('noFlags').classList.add('hidden');
-                    data.flags.forEach(flag => {
-                        const li = document.createElement('li');
-                        li.className = 'flex items-start text-xs font-semibold text-red-600 bg-red-50 p-3 rounded-lg border border-red-100';
-                        li.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 mr-2 flex-shrink-0"></i><span>${flag}</span>`;
-                        flagsList.appendChild(li);
-                    });
-                    lucide.createIcons();
-                } else {
-                    document.getElementById('flagsContainer').classList.add('hidden');
-                    document.getElementById('noFlags').classList.remove('hidden');
-                }
+        function showDashboardSection(section) {
+            const sections = ['overview', 'analytics', 'history', 'logs', 'settings'];
+            sections.forEach(s => {
+                document.getElementById(s + 'Section').classList.add('hidden');
+            });
+            document.getElementById(section + 'Section').classList.remove('hidden');
+        }
 
-                document.getElementById('results').classList.remove('hidden');
-            } catch (error) {
-                console.error(error);
-                alert('Analysis Error: Please check console or backend connection.');
-            } finally {
-                document.getElementById('loading').classList.add('hidden');
-            }
-        };
+        function scrollToFeatures() {
+            document.getElementById('featuresSection').scrollIntoView({ behavior: 'smooth' });
+        }
     </script>
 </body>
 </html>
