@@ -16,7 +16,9 @@ def compute_stylometry(text: str) -> dict:
     sentences = re.split(r'[.!?]+', text)
     sentences = [s.strip() for s in sentences if s.strip()]
     
-    if not sentences:
+    # Check if we have enough text to analyze
+    words = re.findall(r'\w+', text.lower())
+    if len(words) < 50 or len(sentences) < 3:
         return {
             "ai_likelihood": 0.0,
             "burstiness": 0.0,
@@ -33,7 +35,6 @@ def compute_stylometry(text: str) -> dict:
     burstiness = std_dev / mean_length if mean_length > 0 else 0
     
     # Repetition score: ratio of repeated words
-    words = re.findall(r'\w+', text.lower())
     if not words:
         repetition_score = 0
     else:

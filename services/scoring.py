@@ -1,11 +1,16 @@
-def calculate_final_score(ai_likelihood: float, handwriting_similarity: float) -> dict:
+def calculate_final_score(ai_likelihood: float, handwriting_similarity: float, has_stylometry_data: bool = True) -> dict:
     """
     Combines AI likelihood and handwriting similarity into a final suspicion score.
     """
     handwriting_suspicion = 1 - handwriting_similarity
     
-    # Final score formula
-    final_score = (0.6 * ai_likelihood) + (0.3 * handwriting_suspicion) + 0.1
+    if has_stylometry_data:
+        # Full scoring with both stylometry and handwriting
+        final_score = (0.6 * ai_likelihood) + (0.3 * handwriting_suspicion) + 0.1
+    else:
+        # Only use handwriting similarity if we don't have enough text for stylometry
+        final_score = 0.5 * handwriting_suspicion + 0.25
+    
     final_score = max(0.0, min(1.0, float(final_score)))
     
     if final_score < 0.35:
@@ -16,13 +21,12 @@ def calculate_final_score(ai_likelihood: float, handwriting_similarity: float) -
         risk_level = "HIGH"
         
     flags = []
-    if ai_likelihood > 0.6:
+    if has_stylometry_data and ai_likelihood > 0.6:
         flags.append("High AI likelihood detected")
     if handwriting_similarity < 0.4:
         flags.append("Significant handwriting deviation")
-    
-    # These flags are based on the stylometry heuristics indirectly
-    # We'll pass more specific flags from the main route if needed
+    if not has_stylometry_data:
+        flags.append("Insufficient text for stylometry analysis")
     
     return {
         "suspicion_score": final_score,

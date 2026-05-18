@@ -1,6 +1,7 @@
 from sentence_transformers import SentenceTransformer
 import faiss
 import numpy as np
+import re
 
 # Load model once
 model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -12,6 +13,25 @@ def generate_explanation(text: str, metrics: dict) -> str:
     """
     if not text:
         return "No text extracted to analyze."
+
+    # Check if we have enough text for stylometry analysis
+    words = re.findall(r'\w+', text.lower())
+    sentences = re.split(r'[.!?]+', text)
+    sentences = [s.strip() for s in sentences if s.strip()]
+    has_stylometry_data = len(words) >= 50 and len(sentences) >= 3
+
+    if not has_stylometry_data:
+        hw_sim = metrics.get("handwriting_similarity", 0.5)
+        explanation = f"Analysis Summary:\n"
+        explanation += f"- Insufficient text extracted for stylometry analysis (requires at least 50 words and 3 sentences).\n"
+        
+        if hw_sim < 0.4:
+            explanation += f"- Warning: Handwriting similarity ({hw_sim:.2f}) is low compared to the reference sample, indicating it might not be the same student's work.\n"
+        elif hw_sim > 0.8:
+            explanation += f"- Note: Handwriting matches the reference sample closely ({hw_sim:.2f}).\n"
+        
+        explanation += f"\nExtracted Text:\n\"{text[:200]}...\""
+        return explanation
 
     # 1. Chunking
     chunks = [text[i:i+500] for i in range(0, len(text), 400)]
